@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>网盘</title>
+    <title>网盘 - 局域网聊天室</title>
     <style>
         * {
             margin: 0;
@@ -74,7 +74,7 @@
             border-radius: 15px;
             padding: 40px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
@@ -173,13 +173,16 @@
         .file-info {
             display: flex;
             flex: 1;
+            /* max-width: 300px; */
         }
 
         .file-name {
             font-weight: 500;
             color: #2d3748;
             margin-bottom: 5px;
-            word-break: break-all;
+            /* word-break: break-all; */
+            overflow: hidden;
+            max-width: 300px;
         }
 
         .time,
@@ -196,6 +199,7 @@
         .file-actions {
             display: flex;
             gap: 8px;
+            /* min-width: 310px; */
         }
 
         .action-btn {
@@ -294,11 +298,16 @@
             }
 
             .upload-area {
-                padding: 20px 20px;
+                padding: 10px;
             }
 
-            .upload-icon {
+            .upload-icon,
+            .upload-text {
                 display: none;
+            }
+
+            .upload-hint {
+                margin-bottom: 5px;
             }
 
             .file-item {
@@ -310,6 +319,10 @@
             .file-actions {
                 width: 100%;
                 justify-content: flex-end;
+            }
+
+            .file-name {
+                max-width: 75vw;
             }
         }
     </style>
@@ -328,8 +341,8 @@
             <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-icon">📤</div>
                 <div class="upload-text">拖拽文件上传</div>
-                <div class="upload-hint">支持所有格式，单个文件最大500MB</div>
-                <button class="upload-btn" type="button">选择文件</button>
+                <div class="upload-hint">最大500MB</div>
+                <button class="upload-btn" type="button">上传文件</button>
                 <input type="file" id="fileInput" class="file-input" multiple>
 
                 <div class="progress-bar" id="progressBar">
