@@ -7,12 +7,13 @@
 ### 同理其他系统也可以，只需要懂node.js
 ### ！！！需要懂一点点命令行就行
 #### 纪录可手动在网页端清空，文件限制在500mb，可以在js和html代码里修改
+.  
+..  
+...  
+
+
 ### 1. 创建项目
 #### 把chat-app文件夹下载好，拖到你系统的根目录下就行了，给读写权限  
-
-  
-    
-
 
 ### 2. 安装Node.js和npm，依赖
 win的电脑也可以安装，命令不一样
@@ -21,12 +22,11 @@ cd /chat-app
 sudo apt update  
 sudo apt install nodejs npm
 sudo npm install  
-sudo npm install multer
 ```
 
 ### 3. 启动服务器
 ```
-node server.js
+npm start
 ```
 
 ### 4. 访问应用
@@ -44,21 +44,24 @@ nano /etc/systemd/system/chat-app.service
 将 WorkingDirectory=/chat-app替换为你的实际路径
 ```
 [Unit]
-Description=Simple Chat App
+Description=Node.js Chat App Service
 After=network.target
 
 [Service]
 Type=simple
 User=root
 WorkingDirectory=/chat-app
-ExecStart=/usr/bin/node server.js
-Restart=always
+ExecStart=/usr/bin/npm start
+Restart=on-failure
 RestartSec=10
 Environment=NODE_ENV=production
-Environment=PORT=3000
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=chat-app
 
 [Install]
 WantedBy=multi-user.target
+
 ```
 #### 启用开机启动
 ```

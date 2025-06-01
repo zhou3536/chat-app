@@ -3,55 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>简易聊天室</title>
+    <title>匿名群聊</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tango, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-
         }
-        
+
         .chat-container {
-            background: white;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
             height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
-        
-        .chat-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+
+        .header {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
             color: white;
             padding: 20px;
             text-align: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
         }
-        
-        .messages {
+
+        .user-info {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .messages-container {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        
+
         .message {
-            margin-bottom: 15px;
+            background: white;
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             animation: slideIn 0.3s ease-out;
         }
-        
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -62,463 +75,442 @@
                 transform: translateY(0);
             }
         }
-        
+
         .message-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
-        
+
         .username {
             font-weight: bold;
-            color: #667eea;
+            color: #4facfe;
             font-size: 14px;
         }
-        
+
         .timestamp {
-            color: #6c757d;
+            color: #999;
             font-size: 12px;
         }
-        
-        .message-text {
-            background: white;
-            padding: 12px 15px;
-            border-radius: 18px;
-            border: 1px solid #e9ecef;
+
+        .message-content {
             word-wrap: break-word;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            line-height: 1.4;
         }
-        
-        .input-area {
+
+        .file-message {
+            background: #f0f8ff;
+            border-left: 4px solid #4facfe;
+        }
+
+        .file-link {
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .file-link:hover {
+            text-decoration: underline;
+        }
+
+        .input-container {
             background: white;
+            border-top: 1px solid #eee;
             padding: 20px;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .file-upload-area {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
             align-items: center;
+            gap: 12px;
+            align-items: flex-end;
         }
-        
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            padding: 8px 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            resize: none;
+            min-height: 40px;
+            max-height: 150px;
+        }
+
+        .message-input:focus {
+            border-color: #4facfe;
+        }
+
+        .file-input-label {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .file-input-label:hover {
+            background: #ff5252;
+        }
+
         .file-input {
             display: none;
         }
-        
-        .file-button {
-            background: #28a745;
+
+        .send-btn {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 10px 10px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .file-button:hover {
-            background: #218838;
-            transform: translateY(-1px);
-        }
-        
-        .clear-button {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            margin-left: auto;
-        }
-        
-        .clear-button:hover {
-            background: #c82333;
-            transform: translateY(-1px);
-        }
-        
-        .file-info {
-            font-size: 12px;
-            color: #6c757d;
-            margin-left: 10px;
-        }
-        
-        .file-message {
-            background: #e3f2fd;
-            border: 1px solid #2196f3;
-            border-radius: 15px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .file-icon {
-            font-size: 24px;
-        }
-        
-        .file-details {
-            flex: 1;
-        }
-        
-        .file-name {
             font-weight: bold;
-            color: #1976d2;
-            margin-bottom: 2px;
+            transition: transform 0.2s;
         }
-        
-        .file-size {
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .download-button {
-            background: #2196f3;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .download-button:hover {
-            background: #1976d2;
-            transform: scale(1.05);
-        }
-        
-        .uploading {
-            display: none;
-            color: #17a2b8;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        .username-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .username-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .message-form {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .message-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        .message-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .send-button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        .send-button:hover {
+
+        .send-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
-        .send-button:active {
-            transform: translateY(0);
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
-        
-        .online-count {
-            text-align: center;
-            color: #6c757d;
+
+        .file-info {
+            color: #666;
             font-size: 12px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            margin-top: 5px;
         }
-        
-        @media (max-width: 480px) {
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #00000000;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00000000;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 600px) {
             .chat-container {
-                height: 100vh;
-                border-radius: 0;
-                margin: 0;
-            }
-            
-            .message-form {
-                flex-direction: column;
-            }
-            
-            .send-button {
                 width: 100%;
+                height: 100vh;
+            }
+            
+            .input-container {
+                gap: 5px;
+            }
+            
+            .file-input-label {
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            💬 简易聊天室
-        </div>
-        
-        <div class="messages" id="messages"></div>
-        
-        <div class="input-area">
-            <input type="text" id="username" class="username-input" placeholder="输入你的昵称（可选）" maxlength="20">
-            
-            <div class="file-upload-area">
-                <input type="file" id="fileInput" class="file-input" accept="*/*">
-                <button type="button" id="fileButton" class="file-button">📎 选择文件</button>
-                <span class="file-info" id="fileInfo"></span>
-                <span class="uploading" id="uploading">上传中...</span>
-                <button type="button" id="clearButton" class="clear-button">🗑️ 清空全部</button>
-            </div>
-            
-            <form id="messageForm" class="message-form">
-                <input type="text" id="messageInput" class="message-input" placeholder="输入消息..." maxlength="500" required>
-                <button type="submit" class="send-button">发送</button>
-            </form>
+        <div class="header">食不食油饼？</div>
+        <div class="user-info">ikun-<span id="username"></span></div>
+        <div class="messages-container" id="messages"></div>
+        <div class="input-container">
+         <textarea class="message-input" id="messageInput"  rows="1"></textarea>
+            <label for="fileInput" class="file-input-label">文件</label>
+            <input type="file" class="file-input" id="fileInput">
+            <button class="send-btn" id="sendBtn">发送</button>
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
-        const messages = document.getElementById('messages');
-        const messageForm = document.getElementById('messageForm');
-        const messageInput = document.getElementById('messageInput');
-        const usernameInput = document.getElementById('username');
-        const fileInput = document.getElementById('fileInput');
-        const fileButton = document.getElementById('fileButton');
-        const fileInfo = document.getElementById('fileInfo');
-        const uploading = document.getElementById('uploading');
-        const clearButton = document.getElementById('clearButton');
-        
-        // 自动滚动到底部
-        function scrollToBottom() {
-            messages.scrollTop = messages.scrollHeight;
-        }
-        
-        // 格式化文件大小
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-        
-        // 显示文本消息
-        function displayTextMessage(message) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            messageElement.innerHTML = `
-                <div class="message-header">
-                    <span class="username">${escapeHtml(message.username)}</span>
-                    <span class="timestamp">${message.timestamp}</span>
-                </div>
-                <div class="message-text">${escapeHtml(message.text)}</div>
-            `;
-            messages.appendChild(messageElement);
-            scrollToBottom();
-        }
-        
-        // 显示文件消息
-        function displayFileMessage(message) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            messageElement.innerHTML = `
-                <div class="message-header">
-                    <span class="username">${escapeHtml(message.username)}</span>
-                    <span class="timestamp">${message.timestamp}</span>
-                </div>
-                <div class="file-message">
-                    <div class="file-icon">📄</div>
-                    <div class="file-details">
-                        <div class="file-name">${escapeHtml(message.fileName)}</div>
-                        <div class="file-size">${formatFileSize(message.fileSize)}</div>
-                    </div>
-                    <a href="/download/${message.fileId}" class="download-button" download>下载</a>
-                </div>
-            `;
-            messages.appendChild(messageElement);
-            scrollToBottom();
-        }
-        
-        // 显示消息（统一入口）
-        function displayMessage(message) {
-            if (message.type === 'file') {
-                displayFileMessage(message);
-            } else {
-                displayTextMessage(message);
+        class ChatApp {
+            constructor() {
+                this.username = this.generateUsername();
+                this.socket = null;
+                this.initElements();
+                this.bindEvents();
+                this.connectWebSocket();
+                this.loadMessages();
             }
-        }
-        
-        // HTML转义
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        // 加载历史消息
-        socket.on('load messages', (messagesList) => {
-            messages.innerHTML = '';
-            messagesList.forEach(displayMessage);
-        });
-        
-        // 接收新消息
-        socket.on('chat message', (message) => {
-            displayMessage(message);
-        });
-        
-        // 接收文件消息
-        socket.on('file message', (message) => {
-            displayMessage(message);
-        });
-        
-        // 清空所有消息
-        socket.on('clear all', () => {
-            messages.innerHTML = '';
-        });
-        
-        // 发送消息
-        messageForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = messageInput.value.trim();
-            const username = usernameInput.value.trim();
-            
-            if (text) {
-                socket.emit('chat message', {
-                    text: text,
-                    username: username || '匿名用户'
-                });
-                messageInput.value = '';
+
+            generateUsername() {
+                return Math.floor(1000 + Math.random() * 9000).toString();
             }
-        });
-        
-        // 文件选择按钮
-        fileButton.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        // 文件选择处理
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // 检查文件大小
-            if (file.size > 500 * 1024 * 1024) {
-                alert('文件大小不能超过500MB');
-                return;
+
+            initElements() {
+                this.messagesContainer = document.getElementById('messages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendBtn = document.getElementById('sendBtn');
+                this.fileInput = document.getElementById('fileInput');
+                document.getElementById('username').textContent = this.username;
             }
-            
-            fileInfo.textContent = `选中: ${file.name} (${formatFileSize(file.size)})`;
-            
-            // 上传文件
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            uploading.style.display = 'inline';
-            fileButton.disabled = true;
-            
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // 发送文件消息
-                    socket.emit('file message', {
-                        fileId: result.fileId,
-                        fileName: result.fileName,
-                        fileSize: result.fileSize,
-                        username: usernameInput.value.trim() || '匿名用户'
-                    });
-                    
-                    fileInfo.textContent = '上传成功!';
-                    setTimeout(() => {
-                        fileInfo.textContent = '';
-                    }, 2000);
-                } else {
-                    alert('上传失败: ' + result.error);
-                }
-            } catch (error) {
-                console.error('上传错误:', error);
-                alert('上传失败，请重试');
-            } finally {
-                uploading.style.display = 'none';
-                fileButton.disabled = false;
-                fileInput.value = '';
-            }
-        });
-        
-        // 清空按钮
-        clearButton.addEventListener('click', async () => {
-            if (!confirm('确定要清空所有消息和文件吗？此操作不可恢复！')) {
-                return;
-            }
-            
-            try {
-                const response = await fetch('/clear-all', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+
+            bindEvents() {
+                this.sendBtn.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
                     }
                 });
+                this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
                 
-                const result = await response.json();
-                if (result.success) {
-                    // 清空操作由服务器广播，不需要手动清空
-                } else {
-                    alert('清空失败');
+                // 自动调整输入框高度
+                this.messageInput.addEventListener('input', () => {
+                    this.messageInput.style.height = 'auto';
+                    this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
+                });
+            }
+
+            connectWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}`;
+                
+                this.socket = new WebSocket(wsUrl);
+                
+                this.socket.onopen = () => {
+                    console.log('WebSocket连接已建立');
+                };
+                
+                this.socket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    this.displayMessage(data);
+                };
+                
+                this.socket.onclose = () => {
+                    console.log('WebSocket连接已关闭');
+                    setTimeout(() => this.connectWebSocket(), 3000);
+                };
+                
+                this.socket.onerror = (error) => {
+                    console.error('WebSocket错误:', error);
+                };
+            }
+
+            async loadMessages() {
+                try {
+                    const response = await fetch('/api/messages');
+                    const messages = await response.json();
+                    messages.forEach(message => this.displayMessage(message));
+                } catch (error) {
+                    console.error('加载消息失败:', error);
                 }
-            } catch (error) {
-                console.error('清空错误:', error);
-                alert('清空失败，请重试');
             }
-        });
-        
-        // 回车发送消息
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                messageForm.dispatchEvent(new Event('submit'));
+
+            async sendMessage() {
+                const content = this.messageInput.value.trim();
+                if (!content) return;
+
+                const message = {
+                    type: 'text',
+                    username: this.username,
+                    content: content,
+                    timestamp: Date.now()
+                };
+
+                try {
+                    await fetch('/api/messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(message)
+                    });
+                    this.messageInput.value = '';
+                    this.messageInput.style.height = 'auto';
+                } catch (error) {
+                    console.error('发送消息失败:', error);
+                }
             }
-        });
-        
-        // 页面加载时聚焦输入框
-        window.addEventListener('load', () => {
-            messageInput.focus();
-        });
+
+            async handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // 检查文件大小限制 (150MB)
+                const maxSize = 150 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('文件大小不能超过150MB');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('username', this.username);
+
+                // 创建进度显示
+                const progressDiv = this.createProgressIndicator(file.name);
+                this.messagesContainer.appendChild(progressDiv);
+                this.scrollToBottom();
+
+                try {
+                    const xhr = new XMLHttpRequest();
+                    
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = (event.loaded / event.total) * 100;
+                            const progressFill = progressDiv.querySelector('.progress-fill');
+                            progressFill.style.width = percentComplete + '%';
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        progressDiv.remove();
+                        if (xhr.status === 200) {
+                            console.log('文件上传成功');
+                        } else {
+                            alert('文件上传失败');
+                        }
+                    };
+
+                    xhr.onerror = () => {
+                        progressDiv.remove();
+                        alert('文件上传失败');
+                    };
+
+                    xhr.open('POST', '/api/upload');
+                    xhr.send(formData);
+                } catch (error) {
+                    progressDiv.remove();
+                    console.error('上传文件失败:', error);
+                    alert('文件上传失败');
+                }
+
+                // 清除文件选择
+                event.target.value = '';
+            }
+
+            createProgressIndicator(filename) {
+                const div = document.createElement('div');
+                div.className = 'message file-message';
+                div.innerHTML = `
+                    <div class="message-header">
+                        <span class="username">ikun-${this.username}</span>
+                        <span class="timestamp">${this.formatTime(Date.now())}</span>
+                    </div>
+                    <div class="message-content">
+                        📤 正在上传: ${filename}
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                `;
+                return div;
+            }
+
+            displayMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = message.type === 'file' ? 'message file-message' : 'message';
+                
+                let content;
+                if (message.type === 'file') {
+                    // 确保文件名正确显示和下载
+                    const safeFilename = this.escapeHtml(message.filename);
+                    content = `📄 <span class="file-link" data-filename="${this.escapeHtml(message.filename)}">${safeFilename}</span> (${this.formatFileSize(message.filesize)})`;
+                } else {
+                    content = this.escapeHtml(message.content);
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <span class="username">ikun-${this.escapeHtml(message.username)}</span>
+                        <span class="timestamp">${this.formatTime(message.timestamp)}</span>
+                    </div>
+                    <div class="message-content">${content}</div>
+                `;
+
+                // 为文件链接添加点击事件
+                if (message.type === 'file') {
+                    const fileLink = messageDiv.querySelector('.file-link');
+                    fileLink.style.cursor = 'pointer';
+                    fileLink.addEventListener('click', () => {
+                        this.downloadFile(message.filename);
+                    });
+                }
+
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            downloadFile(filename) {
+                // 使用 fetch 下载文件，避免编码问题
+                fetch(`/files/${encodeURIComponent(filename)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('文件下载失败');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // 创建下载链接
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(error => {
+                        console.error('下载失败:', error);
+                        alert('文件下载失败');
+                    });
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            formatTime(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+        }
+
+        // 启动应用
+        new ChatApp();
     </script>
 </body>
 </html>
