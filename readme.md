@@ -3,7 +3,7 @@
 ### 给朋友发颜色网站用微信发不了？颜色app也发不了？朋友又没有其他聊天软件，怎么办？
 ## 一个非常简单的临时聊天传文件的网页，只有几十k代码，无需朋友安装客户端，有浏览器就行
 ## 可以部署在局域网或远程服务器
-程服务器反代套https，看到最后
+#### 远程服务器反代套https，设置访问密码，看最后
 ### 本人测试环境 Ubuntu22，win11
 ### 同理其他系统也可以，只需安装node.js
 ### ！！！需要懂一点点命令行就行
@@ -17,7 +17,7 @@
 #### 把chat-app文件夹下载好，拖到你系统的根目录下就行了，给读写权限  
 
 ### 2. 安装Node.js，
-win手动搜索Node.js安装，在chat-app文件夹下打开命令提示符cdm
+win手动搜索Node.js安装，在chat-app文件夹下打开命令提示符cmd  
 linux安装命令
 ```
 cd /chat-app
@@ -28,18 +28,20 @@ apt install nodejs npm
 ### 3. 启动服务器
 win/linux在在chat-app文件夹下输入
 ```
+#安装依赖，执行成功一次就行了
 npm install
+#启动服务
 npm start
 ```
 
-### 4. 访问应用
+### 4. 浏览器访问网页
 ```
 http://你的服务器IP:3000
 ```
 #### 到这里就可以食用了
 
 ### 5. 开机启动
-创建服务文件
+linux创建服务
 ```
 nano /etc/systemd/system/chat-app.service
 ```
@@ -70,6 +72,7 @@ WantedBy=multi-user.target
 ```
 sudo systemctl enable chat-app.service
 ```
+win把run.bat创建快捷方式拖入启动文件夹
 ### 6.可用反代套https，再加上密码认证
 可以用Lucky <https://lucky.66666.host>，<https://ilucky.net> 做反代，web界面非常友好，一键开启访问密码。  
 官网有一键命令，默认后台http://你的服务器IP:16601  
