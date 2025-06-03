@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>网盘 - 局域网聊天室</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>文件</title>
     <style>
         * {
             margin: 0;
@@ -18,11 +19,26 @@
             min-height: 100vh;
         }
 
+        @media (min-width: 768px) {
+            body {
+                padding: 20px ;
+            }
+
+            .container {
+                border-radius: 20px;
+                min-height: calc(100dvh - 40px);
+                overflow: hidden;
+            }
+            .file-info {
+            padding-right: 10px;
+            }
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
-            min-height: 100vh;
+            /* min-height: 100vh; */
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
 
@@ -134,9 +150,9 @@
         }
 
         .section-title {
-            font-size: 20px;
+            font-size: 18px;
             color: #2d3748;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -164,25 +180,20 @@
         }
 
         .file-icon {
-            font-size: 18px;
             margin-right: 5px;
-            /* width: 40px; */
             text-align: center;
         }
 
         .file-info {
             display: flex;
             flex: 1;
-            /* max-width: 300px; */
         }
 
         .file-name {
             font-weight: 500;
             color: #2d3748;
-            margin-bottom: 5px;
-            /* word-break: break-all; */
+            word-break: break-all;
             overflow: hidden;
-            max-width: 300px;
         }
 
         .time,
@@ -280,12 +291,17 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                min-height: 100vh;
+            }
+
             .header h1 {
                 font-size: 20px;
             }
 
             .header {
                 padding: 10px 15px;
+                height: 55px;
             }
 
             .btn {
@@ -314,6 +330,7 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 5px;
+                padding-left: 5px;
             }
 
             .file-actions {
@@ -321,9 +338,11 @@
                 justify-content: flex-end;
             }
 
-            .file-name {
-                max-width: 75vw;
+            .size {
+                flex: 1;
+                padding-left: 27px;
             }
+
         }
     </style>
 </head>
@@ -331,7 +350,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📁 油饼的网盘</h1>
+            <h1>📁 食不食油饼的文件</h1>
             <a href="/" class="btn btn-back">
                 💬 聊天
             </a>
@@ -400,7 +419,7 @@
             const k = 1024;
             const sizes = ['B', 'K', 'M', 'G'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(0)) + ' ' + sizes[i];
         }
 
         // 上传文件
@@ -479,10 +498,6 @@
                             <div class="file-info">
                                 <div class="file-icon">${getFileIcon(file.name)}</div>
                                 <div class="file-name">${file.name.replace(/^\d+-/, '')}</div>
-                                <div class="file-meta">
-                                    
-                                    
-                                </div>
                             </div>
                             <div class="file-actions">
                                 <span class="size">${formatFileSize(file.size)}</span>

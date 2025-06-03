@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>食不食油饼</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
@@ -17,10 +19,11 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
+
+
         .container {
             display: flex;
             flex-direction: column;
-            height: 100dvh;
             max-width: 800px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
@@ -88,7 +91,7 @@
         }
 
         .user-info {
-            padding: 10px 15px;
+            padding: 8px 10px;
             border-left: 4px solid #4299e1;
         }
 
@@ -116,6 +119,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -157,10 +161,10 @@
 
         .message-input {
             flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e2e8f0;
+            padding: 10px 15px;
+            border: 2px solid #4299e184;
             border-radius: 25px;
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
             transition: border-color 0.3s ease;
         }
@@ -170,13 +174,13 @@
         }
 
         .send-btn {
-            padding: 12px 10px;
+            padding: 8px 10px;
             background: #4299e1;
             color: white;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 17px;
             transition: background 0.3s ease;
             min-width: 60px;
         }
@@ -214,26 +218,52 @@
             background: #a8a8a8;
         }
 
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                border-radius: 20px;
+                overflow: hidden;
+                height: calc(100dvh - 40px);
+
+            }
+
+            .user-info {
+                margin-bottom: 10px;
+            }
+        }
+
         @media (max-width: 768px) {
+            .container {
+                height: 100dvh;
+            }
+
             .header {
                 padding: 10px 15px;
+                height: 55px;
+                position: sticky;
+                top: 0;
             }
-            
+
             .header h1 {
                 font-size: 20px;
             }
+
             .messages {
                 border-radius: 0;
                 margin-bottom: 0;
             }
+
             .chat-area {
-                padding:  0;
+                padding: 0;
             }
-            
+
             .input-area {
                 padding: 6px;
             }
-            
+
             .btn {
                 padding: 6px 12px;
                 font-size: 12px;
@@ -241,6 +271,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -248,14 +279,16 @@
             <div class="header-buttons">
                 <button class="btn btn-clear" onclick="clearHistory()">清空记录</button>
                 <a href="/files.html" class="btn btn-files">
-                    📁 网盘
+                    📁 文件
                 </a>
             </div>
         </div>
 
         <div class="chat-area">
             <div class="user-info">
-                <span>ID：ikun-</span><span id="username"></span>
+                <span>ID：</span>
+                <span id="username"></span>
+                <span id="status-1">连接中...</span>
             </div>
 
             <div class="messages" id="messages">
@@ -279,20 +312,20 @@
             ctx.textBaseline = 'top';
             ctx.font = '14px Arial';
             ctx.fillText('Browser fingerprint', 2, 2);
-            
-            const fingerprint = canvas.toDataURL() + 
-                               navigator.userAgent + 
-                               navigator.language + 
-                               screen.width + screen.height +
-                               new Date().getTimezoneOffset();
-            
+
+            const fingerprint = canvas.toDataURL() +
+                navigator.userAgent +
+                navigator.language +
+                screen.width + screen.height +
+                new Date().getTimezoneOffset();
+
             let hash = 0;
             for (let i = 0; i < fingerprint.length; i++) {
                 const char = fingerprint.charCodeAt(i);
                 hash = ((hash << 5) - hash) + char;
                 hash = hash & hash; // 转换为32位整数
             }
-            
+
             // 转换为4位字符串
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
@@ -301,22 +334,22 @@
                 result += chars[hash % chars.length];
                 hash = Math.floor(hash / chars.length);
             }
-            
+
             return result;
         }
 
         // 初始化
         const username = generateUsername();
         document.getElementById('username').textContent = username;
-        
+
         // Socket.IO 连接
         const socket = io();
-        
+
         // 发送消息
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-            
+
             if (message) {
                 socket.emit('chat message', {
                     username: username,
@@ -325,23 +358,28 @@
                 input.value = '';
             }
         }
-        
+
         // 清空聊天记录
+        const sbsyb = '1233';
         function clearHistory() {
-            if (confirm('确定要清空所有聊天记录吗？')) {
+            const password = prompt('你干嘛~~!哎哟~~~');
+            if (password === null) {
+                return;
+            }
+            if (password === sbsyb) {
                 socket.emit('clear history');
             }
         }
-        
+
         // 显示消息
         function displayMessage(data) {
             const messagesDiv = document.getElementById('messages');
             const emptyState = messagesDiv.querySelector('.empty-state');
-            
+
             if (emptyState) {
                 emptyState.remove();
             }
-            
+
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
             messageDiv.innerHTML = `
@@ -351,11 +389,11 @@
                 </div>
                 <div class="message-content">${escapeHtml(data.message)}</div>
             `;
-            
+
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-        
+
         // HTML转义
         function escapeHtml(text) {
             const map = {
@@ -365,43 +403,50 @@
                 '"': '&quot;',
                 "'": '&#039;'
             };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            return text.replace(/[&<>"']/g, function (m) { return map[m]; });
         }
-        
+
         // Socket 事件监听
         socket.on('chat message', displayMessage);
-        
+
         socket.on('chat history', (history) => {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
-            
+
             if (history.length === 0) {
                 messagesDiv.innerHTML = '<div class="empty-state">开始唱跳RAP吧！</div>';
             } else {
                 history.forEach(displayMessage);
             }
         });
-        
+
         socket.on('history cleared', () => {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '<div class="empty-state">聊天记录已清空</div>';
         });
-        
+
         // 回车发送消息
         document.getElementById('messageInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage();
             }
         });
-        
+
         // 连接状态提示
+        const statusDiv = document.getElementById('status-1');
+
         socket.on('connect', () => {
             console.log('已连接到服务器');
+            statusDiv.textContent = '已连接';
+            statusDiv.style.color = 'green'; // 对应绿色样式
         });
-        
+
         socket.on('disconnect', () => {
             console.log('与服务器断开连接');
+            statusDiv.textContent = '未连接';
+            statusDiv.style.color = 'red'; // 对应红色样式
         });
     </script>
 </body>
+
 </html>
