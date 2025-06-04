@@ -196,6 +196,6 @@ app.delete('/files/:filename', (req, res) => {
 });
 
 // 启动服务器
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`启动成功！浏览器访问: http://你的IP:${PORT}`);
 });
