@@ -11,6 +11,18 @@
 .  
 ..  
 ...  
+```
+chat-app/
+├── data/                 # 数据存储目录
+│   ├── uploads/         # 上传文件存储
+│   └── chat.json        # 聊天记录
+├── public/              # 前端文件
+│   ├── index.html       # 聊天页面
+│   └── files.html       # 文件管理页面
+├── package.json         # 项目配置
+├── server.js           # 服务器主文件
+└── README.md           # 说明文档
+```
 
 
 ### 1. 创建项目

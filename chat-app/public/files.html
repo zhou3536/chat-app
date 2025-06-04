@@ -21,7 +21,7 @@
 
         @media (min-width: 768px) {
             body {
-                padding: 20px ;
+                padding: 20px;
             }
 
             .container {
@@ -29,8 +29,9 @@
                 min-height: calc(100dvh - 40px);
                 overflow: hidden;
             }
+
             .file-info {
-            padding-right: 10px;
+                padding-right: 10px;
             }
         }
 
@@ -494,10 +495,9 @@
 
                     filesList.innerHTML = files.map(file => `
                         <div class="file-item">
-                            
                             <div class="file-info">
                                 <div class="file-icon">${getFileIcon(file.name)}</div>
-                                <div class="file-name">${file.name.replace(/^\d+-/, '')}</div>
+                                <div class="file-name">${file.name}</div>
                             </div>
                             <div class="file-actions">
                                 <span class="size">${formatFileSize(file.size)}</span>
@@ -510,7 +510,7 @@
                                 </button>
                             </div>
                         </div>
-                    `).join('');
+            `).join('');
                 })
                 .catch(error => {
                     console.error('获取文件列表失败:', error);

@@ -42,8 +42,9 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     // 保持原文件名，支持中文
+    // cb(null, Date.now() + '-' + originalName);
     const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
-    cb(null, Date.now() + '-' + originalName);
+    cb(null,originalName);
   }
 });
 
@@ -145,10 +146,14 @@ app.get('/files', (req, res) => {
       return {
         name: filename,
         size: stats.size,
-        uploadTime: stats.mtime.toLocaleString('zh-CN')
+        uploadTime: stats.mtime.toLocaleString('zh-CN'),
+        mtime: stats.mtime.getTime() // 添加时间戳用于排序
       };
     });
-    res.json(fileList);
+    fileList.sort((a, b) => b.mtime - a.mtime);
+    // 移除临时字段并返回
+    const result = fileList.map(({ mtime, ...keep }) => keep);
+    res.json(result);
   } catch (error) {
     console.error('获取文件列表错误:', error);
     res.status(500).json({ error: '获取文件列表失败' });
@@ -191,7 +196,6 @@ app.delete('/files/:filename', (req, res) => {
 });
 
 // 启动服务器
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`服务器运行在 http://localhost:${PORT}`);
-  console.log(`局域网访问: http://[your-ip]:${PORT}`);
+server.listen(PORT, '127.0.0.1', () => {
+  console.log(`启动成功！浏览器访问: http://你的IP:${PORT}`);
 });
