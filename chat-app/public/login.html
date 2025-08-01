@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background: linear-gradient(to bottom right, #000037, #15008e, #0e0030);;
+            margin: 0;
+            height: 100vh;
+            height: 100dvh;
+            -webkit-tap-highlight-color: transparent;
+            /* color: var(--df-ziji); */
+            transition:
+                background-color 0.3s ease-in-out,
+                color 0.3s ease-in-out;
+            min-width: 320px;
+        }
+
+        .login-container {
+            background: #fff;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            border-radius: 15px;
+            box-shadow: #eee;
+            text-align: center;
+            width: 100%;
+            max-width: 320px;
+            height: 300px;
+        }
+
+        .login-container h2 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+            font-size: 28px;
+            background-image: linear-gradient(to right, #58AADD 0%, #DB5C7F 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            white-space: nowrap;
+        }
+
+        .login-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 12px auto;
+            margin-bottom: 0;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: transparent;
+            outline: none;
+            color: var(--df-ziji);
+            text-align: center;
+            max-width: 260px;
+        }
+
+        .login-container input:focus {
+            outline: 1px solid #0c8bfa;
+        }
+
+        .loginbtn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .loginbtn:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin-top: 12px;
+            color: red;
+        }
+
+        #themeToggle {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            width: 24px;
+            height: 24px;
+            background-color: transparent;
+            border: none;
+            margin-right: 5px;
+            vertical-align: middle;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="themeToggle"></button>
+    <div class="login-container">
+        <h2>探索无界限</h2>
+        <p>请输入用户名和密码继续</p>
+        <input type="text" id="usernameInput" placeholder="username" class="inputinfo">
+        <input type="password" id="passwordInput" placeholder="password" class="inputinfo">
+        <button class="loginbtn" onclick="submitPassword()">登录</button>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('passwordInput');
+
+        passwordInput.addEventListener('keypress', function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                submitPassword();
+            }
+        });
+        async function submitPassword() {
+
+            const username = document.getElementById('usernameInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = '';
+
+            if (!username || !password) {
+                messageDiv.textContent = '请输入用户名和密码';
+                return
+            };
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.style.color = 'green';
+                    messageDiv.textContent = data.message || '登录成功';
+
+                    window.location.href = '/';
+                } else {
+                    messageDiv.style.color = 'red';
+                    messageDiv.textContent = data.message || '登录失败';
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'An error occurred. Please try again.';
+            }
+        };
+    </script>
+</body>
+
+</html>
