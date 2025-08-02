@@ -305,46 +305,20 @@
     </div>
 
     <script>
-        // 生成基于浏览器特征的4位用户名
-        function generateUsername() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.textBaseline = 'top';
-            ctx.font = '14px Arial';
-            ctx.fillText('Browser fingerprint', 2, 2);
-
-            const fingerprint = canvas.toDataURL() +
-                navigator.userAgent +
-                navigator.language +
-                screen.width + screen.height +
-                new Date().getTimezoneOffset();
-
-            let hash = 0;
-            for (let i = 0; i < fingerprint.length; i++) {
-                const char = fingerprint.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash; // 转换为32位整数
-            }
-
-            // 转换为4位字符串
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            hash = Math.abs(hash);
-            for (let i = 0; i < 4; i++) {
-                result += chars[hash % chars.length];
-                hash = Math.floor(hash / chars.length);
-            }
-
-            return result;
-        }
 
         // 初始化
-        const username = generateUsername();
-        document.getElementById('username').textContent = username;
-
         // Socket.IO 连接
         const socket = io();
-
+        socket.on('id', (data) => {
+            document.getElementById('username').textContent = data;
+        });
+        socket.on('error', (data) => {
+            console.log(data);
+            alert(data);
+        });
+        socket.on('refresh', (url) => {
+            if (url) { window.location.href = url; } else { location.reload(); }
+        });
         // 发送消息
         function sendMessage() {
             const input = document.getElementById('messageInput');
@@ -352,7 +326,6 @@
 
             if (message) {
                 socket.emit('chat message', {
-                    username: username,
                     message: message
                 });
                 input.value = '';
@@ -360,15 +333,8 @@
         }
 
         // 清空聊天记录
-        const sbsyb = '1233';
         function clearHistory() {
-            const password = prompt('小黑子！露出鸡脚了吧？');
-            if (password === null) {
-                return;
-            }
-            if (password === sbsyb) {
-                socket.emit('clear history');
-            }
+            socket.emit('clear history');
         }
 
         // 显示消息
@@ -446,6 +412,23 @@
             statusDiv.textContent = '未连接';
             statusDiv.style.color = 'red'; // 对应红色样式
         });
+        async function lgo() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // alert('You have been logged out.');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        }
     </script>
 </body>
 

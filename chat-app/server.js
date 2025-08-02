@@ -9,19 +9,14 @@ import fs from 'fs';
 import cors from 'cors';
 import { fileURLToPath } from 'url'; // 辅助函数，用于获取当前文件路径
 import { dirname } from 'path';     // 辅助函数，用于获取目录名
-
+import cookieParser from 'cookie-parser';
 // 模拟 CommonJS 中的 __dirname 和 __filename
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+
 dotenv.config();
 const PORT = process.env.PORT || '3000';
 const HOST = process.env.HOST || '127.0.0.1';
@@ -47,6 +42,18 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(uploadsDir));
 
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  },
+  allowRequest: (req, callback) => {
+    cookieParser(COOKIE_SECRET)(req, {}, () => {
+      callback(null, true);
+    });
+  }
+});
 // 文件上传配置
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -94,16 +101,25 @@ loadChatHistory();
 
 // Socket.IO 连接处理
 io.on('connection', (socket) => {
-  console.log('用户连接:', socket.id);
-
-  // 发送历史聊天记录
+  const userId = socket.request.signedCookies && socket.request.signedCookies.user_id;
+  if (userId) {
+    console.log(`Socket.IO 客户端连接成功，用户ID: ${userId}`);
+    socket.userId = userId;
+  } else {
+    console.log("Socket.IO 客户端连接成功，但未找到用户 ID 或未认证，跳转登录页面");
+    socket.emit('refresh','/login.html');
+    socket.emit("error", "登录已过期，请刷新网页重新登录，如果你刚刚登录过了，可能是你的浏览器禁用了cookie！");
+    socket.disconnect();
+    return;
+  }
+  socket.emit('id', userId);
   socket.emit('chat history', chatHistory);
 
   // 处理新消息
   socket.on('chat message', (data) => {
     const message = {
       id: Date.now(),
-      username: data.username,
+      username: socket.userId,
       message: data.message,
       timestamp: new Date().toLocaleString('zh-CN')
     };
@@ -117,13 +133,17 @@ io.on('connection', (socket) => {
 
   // 处理清空记录
   socket.on('clear history', () => {
+    if (socket.userId !== 'user_001') {
+      socket.emit('error', '食不食油饼');
+      return
+    };
     chatHistory = [];
     saveChatHistory();
     io.emit('history cleared');
   });
 
   socket.on('disconnect', () => {
-    console.log('用户断开连接:', socket.id);
+    console.log(`Socket.IO 客户端连接断开，用户ID: ${userId}`);
   });
 });
 
