@@ -86,6 +86,8 @@ function loadChatHistory() {
     chatHistory = [];
   }
 }
+// 初始化加载聊天历史
+loadChatHistory();
 
 // 保存聊天历史
 function saveChatHistory() {
@@ -96,8 +98,7 @@ function saveChatHistory() {
   }
 }
 
-// 初始化加载聊天历史
-loadChatHistory();
+
 
 // Socket.IO 连接处理
 io.on('connection', (socket) => {

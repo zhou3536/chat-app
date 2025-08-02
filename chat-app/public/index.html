@@ -111,18 +111,16 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 0.3s ease;
+            animation: fadeInUp 0.5s ease;
         }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
         }
 
@@ -269,6 +267,34 @@
                 font-size: 12px;
             }
         }
+
+        #dialog {
+            margin: auto;
+            padding: 15px;
+            padding-top: 20px;
+            object-fit: contain;
+            text-align: center;
+            border-style: none;
+            outline: none;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px #00000040;
+        }
+
+        #dialog p {
+            margin-bottom: 15px;
+        }
+
+        #dialog div {
+            padding: 0 3px;
+            display: flex;
+            justify-content: space-between
+        }
+
+        #dialog button {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #00000010;
+        }
     </style>
 </head>
 
@@ -277,7 +303,7 @@
         <div class="header">
             <h1>💬 食不食油饼？</h1>
             <div class="header-buttons">
-                <button class="btn btn-clear" onclick="clearHistory()">清空记录</button>
+                <button class="btn btn-clear" onclick="dialog.showModal()">清空记录</button>
                 <a href="/files.html" class="btn btn-files">
                     📁 文件
                 </a>
@@ -303,6 +329,13 @@
             <button class="send-btn" onclick="sendMessage()">发送</button>
         </div>
     </div>
+    <dialog id="dialog" onclick="dialog.close()">
+        <p>删除所有历史记录</p>
+        <div>
+            <button onclick="clearHistory()">确定</button>
+            <button>取消</button>
+        </div>
+    </dialog>
 
     <script>
 
