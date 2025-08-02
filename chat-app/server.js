@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
     socket.userId = userId;
   } else {
     console.log("Socket.IO 客户端连接成功，但未找到用户 ID 或未认证，跳转登录页面");
-    socket.emit('refresh','/login.html');
+    socket.emit('refresh', '/login.html');
     socket.emit("error", "登录已过期，请刷新网页重新登录，如果你刚刚登录过了，可能是你的浏览器禁用了cookie！");
     socket.disconnect();
     return;
@@ -124,10 +124,8 @@ io.on('connection', (socket) => {
       message: data.message,
       timestamp: new Date().toLocaleString('zh-CN')
     };
-
     chatHistory.push(message);
     saveChatHistory();
-
     // 广播消息给所有客户端
     io.emit('chat message', message);
   });
@@ -141,6 +139,18 @@ io.on('connection', (socket) => {
     chatHistory = [];
     saveChatHistory();
     io.emit('history cleared');
+  });
+
+  //删除单个历史记录
+  socket.on('deletemessage', (id) => {
+    if (socket.userId !== 'user_001') {
+      socket.emit('error', '食不食油饼');
+      return
+    };
+    console.log('删除消息：',id)
+    chatHistory = chatHistory.filter(item => item.id !== id);
+    saveChatHistory();
+    io.emit('chat history', chatHistory);
   });
 
   socket.on('disconnect', () => {

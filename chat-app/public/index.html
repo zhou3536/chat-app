@@ -64,6 +64,10 @@
             gap: 5px;
         }
 
+        .btn:nth-child(1) {
+            display: none;
+        }
+
         .btn-clear {
             background: #e53e3e;
             color: white;
@@ -126,7 +130,7 @@
 
         .message-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: end;
             align-items: center;
             margin-bottom: 5px;
         }
@@ -138,13 +142,23 @@
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 12px;
+            margin-right: auto;
+            margin-left: -3px;
         }
 
         .timestamp {
             font-size: 11px;
             color: #718096;
         }
-
+        .deletebtn{
+            padding: 0;
+            font-size: 12px;
+            line-height: 12px;
+            margin-left: 3px;
+            border: none;
+            color: #ff000090;
+            background: transparent;
+        }
         .message-content {
             color: #2d3748;
             line-height: 1.5;
@@ -270,14 +284,13 @@
 
         #dialog {
             margin: auto;
-            padding: 15px;
-            padding-top: 20px;
+            padding: 25px 30px 20px;
             object-fit: contain;
             text-align: center;
             border-style: none;
             outline: none;
             border-radius: 5px;
-            box-shadow: 0 1px 5px #00000040;
+            box-shadow: 0 1px 3px #00000040;
         }
 
         #dialog p {
@@ -303,7 +316,7 @@
         <div class="header">
             <h1>💬 食不食油饼？</h1>
             <div class="header-buttons">
-                <button class="btn btn-clear" onclick="dialog.showModal()">清空记录</button>
+                <button id="clearHistory" class="btn btn-clear" onclick="dialog.showModal()">清空记录</button>
                 <a href="/files.html" class="btn btn-files">
                     📁 文件
                 </a>
@@ -338,12 +351,15 @@
     </dialog>
 
     <script>
-
+        let userid;
         // 初始化
         // Socket.IO 连接
         const socket = io();
         socket.on('id', (data) => {
-            document.getElementById('username').textContent = data;
+            userid = data;
+            document.getElementById('username').textContent = userid;
+            const btn = document.getElementById('clearHistory')
+            if (userid === 'user_001') { btn.style.display = 'inline-flex' }
         });
         socket.on('error', (data) => {
             console.log(data);
@@ -369,6 +385,10 @@
         function clearHistory() {
             socket.emit('clear history');
         }
+        // 删除指定记录
+        function deletemessage(id) {
+            socket.emit('deletemessage', id);
+        }
 
         // 显示消息
         function displayMessage(data) {
@@ -381,28 +401,36 @@
 
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="username">${data.username}</span>
-                    <span class="timestamp">${data.timestamp}</span>
-                </div>
-                <div class="message-content">${escapeHtml(data.message)}</div>
-            `;
+
+            const messageheader = document.createElement('div');
+            messageheader.className = 'message-header';
+
+            const username = document.createElement('span');
+            username.className = 'username';
+            username.innerText = data.username;
+
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.innerText = data.timestamp;
+
+            const deletebtn = document.createElement('button');
+            deletebtn.classList = 'deletebtn';
+            deletebtn.innerText = '✕';
+            deletebtn.onclick = function () { deletemessage(data.id) };
+
+            const messagecontent = document.createElement('div');
+            messagecontent.className = 'message-content';
+            messagecontent.innerText = data.message;
+
+            messageheader.appendChild(username)
+            messageheader.appendChild(timestamp)
+            if (userid === 'user_001') { messageheader.appendChild(deletebtn) }
+            messageDiv.appendChild(messageheader)
+            messageDiv.appendChild(messagecontent)
+
 
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        // HTML转义
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, function (m) { return map[m]; });
         }
 
         // Socket 事件监听
