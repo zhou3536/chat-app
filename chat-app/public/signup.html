@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            height: 100vh;
+            height: 100dvh;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom right, #2525bc, #2471dc, #4b89e0, #455ad1, #4c3484);
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        a {
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.05);
+            width: 380px;
+            border-radius: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+
+        .title {
+            display: flex;
+            margin: 0 0 20px 0;
+            font-weight: 600;
+            background: rgba(248, 250, 252, 0.6);
+            border-radius: 15px;
+            padding: 8px 0;
+            gap: 4px;
+        }
+
+        .title a {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 12px;
+            color: #64748b;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+
+
+        .title .Aactive {
+            background: linear-gradient(135deg, #78a6f0, #636ae9);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .page {
+            display: none;
+            text-align: center;
+            margin-bottom: 10px;
+            animation: fadeIn1 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn1 {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page>div {
+            width: 100%;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .container input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 6px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .container input:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .container input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .container button {
+            background: linear-gradient(135deg, #78a6f0, #636ae9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container .wait {
+            cursor: wait;
+        }
+
+        #postlogin,
+        #postcode,
+        #postcode-2 {
+            width: 100%;
+            height: 48px;
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .page>div button {
+            width: 85px;
+            height: 36px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #94a3b8, #64748b) !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        #login p {
+            margin: 10px auto 20px;
+            font-size: 18px;
+        }
+
+        #login a {
+            display: block;
+            margin-top: 10px;
+            padding: 10px 45px;
+            border-radius: 10px;
+            line-height: 18px;
+            background-color: #6aa4f7;
+            color: #000;
+        }
+
+        #login a:nth-of-type(2) {
+            background-color: #f56161be;
+        }
+
+        /* 通知样式优化 */
+        #tongzhi {
+            position: fixed;
+            z-index: 10000;
+            max-height: 110px;
+            overflow: hidden;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0 20px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #tongzhi:empty {
+            display: none;
+        }
+
+        #tongzhi p {
+            text-align: center;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 12px 24px;
+            min-width: 120px;
+            width: fit-content;
+            border-radius: 50px;
+            margin: 0 auto 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeIn2 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 90vw;
+        }
+
+        @keyframes fadeIn2 {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="title" id="nav">
+            <a href="#login">登录账号</a>
+            <a href="#signup">注册账号</a>
+            <a href="#revisepwd">重置密码</a>
+        </div>
+        <div id="login" class="page">
+            <div>
+                <input type="text" id="loginemail" placeholder="输入邮箱">
+            </div>
+            <div>
+                <input type="password" id="loginpwd" placeholder="输入密码">
+            </div>
+            <button id="postlogin">登录账号</button>
+        </div>
+        <div id="signup" class="page">
+            <div>
+                <input type="text" id="username" placeholder="输入昵称">
+            </div>
+            <div>
+                <input type="text" id="email" placeholder="输入邮箱">
+            </div>
+            <div>
+                <input type="password" id="pwd" placeholder="输入密码">
+            </div>
+            <div>
+                <input type="password" id="pwd2" placeholder="重复密码">
+            </div>
+            <div>
+                <input type="text" id="Invitationcode" placeholder="输入邀请码">
+            </div>
+            <div>
+                <input type="text" id="code" placeholder="输入验证码"><button id="getcode">获取</button>
+            </div>
+            <button id="postcode">创建账号</button>
+        </div>
+
+        <div id="revisepwd" class="page">
+            <div>
+                <input type="text" id="email-2" placeholder="输入邮箱">
+            </div>
+            <div>
+                <input type="password" id="pwd-2" placeholder="输入新密码">
+            </div>
+            <div>
+                <input type="password" id="pwd2-2" placeholder="重复新密码">
+            </div>
+            <div>
+                <input type="text" id="code-2" placeholder="输入验证码"><button id="getcode-2">获取</button>
+            </div>
+            <button id="postcode-2">修改密码</button>
+        </div>
+
+    </div>
+    <div id="tongzhi"></div>
+    <script>
+        let LoginStatus = false;
+        const getcode = document.getElementById('getcode')
+        const postcode = document.getElementById('postcode')
+
+        const getcode2 = document.getElementById('getcode-2')
+        const postcode2 = document.getElementById('postcode-2')
+
+        const postloginBtn = document.getElementById('postlogin')
+        postloginBtn.addEventListener('click', postlogin)
+        async function postlogin() {
+            const email = document.getElementById('loginemail').value;
+            const password = document.getElementById('loginpwd').value;
+            if (!username || !password) {
+                xstongzhi('请输入用户名和密码');
+                return
+            };
+            try {
+                const response = await fetch('/user/postlogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const json = await response.json();
+                xstongzhi(json.message);
+                if (response.ok) {
+                    if (window.location.pathname === 'signup.html') {
+                        checkLoginStatus()
+                    } else {
+                        location.reload();
+                    };
+                };
+            } catch (error) {
+                console.error('Error during login:', error);
+                xstongzhi('网络错误，请稍后重试');
+            }
+        };
+        //退出登录
+        async function postlogout() {
+            const userConfirmed = confirm('您确定要退出登录吗？');
+            if (!userConfirmed) { return }
+            try {
+                const response = await fetch('/user/postlogout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+                // const json = await response.json();
+                if (response.ok) {
+                    window.location.href = '/signup.html';
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+            }
+        };
+
+        const loginpwdinput = document.getElementById('loginpwd')
+        loginpwdinput.addEventListener('keypress', function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                postloginBtn.click();
+            }
+        });
+
+        getcode.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const Invitationcode = document.getElementById('Invitationcode').value;
+            const pwd1 = document.getElementById('pwd').value;
+            const pwd2 = document.getElementById('pwd2').value;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { xstongzhi('输入正确的邮箱'); return };
+            if (!pwd1) { xstongzhi('请输入密码'); return }
+            if (pwd1 !== pwd2) { xstongzhi('两次输入的密码不一样'); return };
+            getcode.classList.add('wait');
+            xstongzhi('请求验证码...');
+            try {
+                const response = await fetch('/user/getcode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, Invitationcode: Invitationcode }),
+                    signal: AbortSignal.timeout(5000) // 5秒超时
+                });
+                const json = await response.json();
+                xstongzhi(json.message);
+                if (!response.ok) {
+                    return
+                }
+                startCountdown(getcode);
+
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+                xstongzhi('请求失败，请稍后再试');
+            } finally {
+                getcode.classList.remove('wait')
+            }
+        });
+        postcode.addEventListener('click', async () => {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const pwd1 = document.getElementById('pwd').value;
+            const pwd2 = document.getElementById('pwd2').value;
+            const code = document.getElementById('code').value;
+            if (!email || !pwd1 || !pwd2 || !code) { xstongzhi('请输入所有内容'); return };
+            if (pwd1 !== pwd2) { xstongzhi('两次输入的密码不一样'); return };
+            try {
+                const response = await fetch('/user/postcode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, email: email, pwd: pwd1, code: code }),
+                    signal: AbortSignal.timeout(5000) // 5秒超时
+                });
+                const json = await response.json();
+                xstongzhi(json.message);
+                if (!response.ok) {
+                    return
+                }
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+                xstongzhi('请求失败，请稍后再试');
+            };
+            const loginemail = document.getElementById('loginemail');
+            if (loginemail) {
+                loginemail.value = email;
+                window.location.assign('#login');
+            }
+        });
+        getcode2.addEventListener('click', async () => {
+            const email = document.getElementById('email-2').value;
+            const pwd1 = document.getElementById('pwd-2').value;
+            const pwd2 = document.getElementById('pwd2-2').value;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { xstongzhi('输入正确的邮箱'); return };
+            if (!pwd1) { xstongzhi('请输入密码'); return }
+            if (pwd1 !== pwd2) { xstongzhi('两次输入的密码不一样'); return };
+            getcode2.classList.add('wait');
+            xstongzhi('验证码发送中');
+            try {
+                const response = await fetch('/user/getcode2', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email }),
+                    signal: AbortSignal.timeout(5000) // 5秒超时
+                });
+                const json = await response.json();
+                xstongzhi(json.message);
+                if (!response.ok) {
+                    return
+                }
+                startCountdown(getcode2);
+
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+                xstongzhi('请求失败，请稍后再试');
+            } finally {
+                getcode2.classList.remove('wait');
+            }
+        });
+        postcode2.addEventListener('click', async () => {
+            const email = document.getElementById('email-2').value;
+            const pwd1 = document.getElementById('pwd-2').value;
+            const pwd2 = document.getElementById('pwd2-2').value;
+            const code = document.getElementById('code-2').value;
+            if (!email || !pwd1 || !pwd2 || !code) { xstongzhi('请输入所有内容'); return };
+            if (pwd1 !== pwd2) { xstongzhi('两次输入的密码不一样'); return };
+            try {
+                const response = await fetch('/user/postcode2', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, pwd: pwd1, code: code }),
+                    signal: AbortSignal.timeout(5000) // 5秒超时
+                });
+                const json = await response.json();
+                xstongzhi(json.message);
+                if (!response.ok) { return }
+
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+                xstongzhi('请求失败，请稍后再试');
+            };
+            document.getElementById('login').innerHTML = `
+            <div>
+                <input type="text" id="loginemail" placeholder="输入邮箱">
+            </div>
+            <div>
+                <input type="password" id="loginpwd" placeholder="输入密码">
+            </div>
+            <button id="postlogin" onclick="postlogin()">登录账号</button>`
+            const loginemail = document.getElementById('loginemail');
+            if (loginemail) {
+                loginemail.value = email;
+                window.location.assign('#login');
+            }
+        });
+
+        function startCountdown(Element) {
+            const button = Element;
+            button.disabled = true;
+            let timeLeft = 60;
+            const originalText = button.textContent;
+            // 更新按钮文本为倒计时
+            button.textContent = timeLeft;
+            const countdownInterval = setInterval(() => {
+                timeLeft--; // 减少秒数
+
+                if (timeLeft >= 0) {
+                    button.textContent = timeLeft; // 更新按钮文本
+                } else {
+                    clearInterval(countdownInterval); // 清除定时器
+                    button.textContent = originalText; // 恢复按钮原始文本
+                    button.disabled = false; // 重新启用按钮
+                }
+            }, 1000);
+        }
+
+        //显示通知
+        function xstongzhi(text, time) {
+            if (!text) { return };
+            console.log(text);
+            const xstime = time || 2000;
+            const tongzhi = document.getElementById('tongzhi');
+            const p = document.createElement('p');
+            p.innerText = text;
+            tongzhi.prepend(p);
+            setTimeout(() => { p.remove() }, xstime);
+        }
+
+        // 监听hash变化
+        window.addEventListener('load', HashChange);
+        window.addEventListener('hashchange', HashChange);
+        function HashChange() {
+            const Pages = document.querySelectorAll('.page');
+            const nav = document.getElementById('nav');
+            const Links = nav.querySelectorAll('a');
+            const hash = window.location.hash || '#login';
+            const Elementid = hash.slice(1);
+            Pages.forEach(page => { page.style.display = 'none'; });
+            Links.forEach(link => {
+                link.classList.remove('Aactive');
+                if (link.getAttribute('href').substring(0) === hash) { link.classList.add('Aactive'); }
+            });
+
+            const defaultpage = document.getElementById('login');
+            const displaypage = document.getElementById(Elementid) || defaultpage;
+            displaypage.style.display = 'block';
+        };
+        //检查登录状态
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/user/status');
+                const data = await response.json();
+                if (data.loggedIn) {
+                    LoginStatus = true;
+                    document.getElementById('login').innerHTML = `
+                        <h1>欢迎回来</h1>
+                        <p>${data.username}</p>
+                        <a href="/">跳转主页</a>
+                        <a href="" onclick="postlogout()">退出登录</a>`
+                };
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+            }
+        }
+        checkLoginStatus();
+    </script>
+</body>
+
+</html>

@@ -16,7 +16,7 @@
 
         body {
             font-family: sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(to bottom right, #259de8, #7057ff, #56c8e8);
         }
 
 
@@ -92,8 +92,7 @@
         }
 
         .user-info {
-            padding: 8px 10px;
-            border-left: 4px solid #4299e1;
+            font-size: 18px;
         }
 
         .messages {
@@ -102,7 +101,7 @@
             padding: 15px;
             background: #f8f9fa;
             border-radius: 10px;
-            margin-bottom: 15px;
+            /* margin-bottom: 15px; */
             border: 1px solid #e2e8f0;
         }
 
@@ -113,6 +112,10 @@
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             animation: fadeInUp 0.5s ease;
+        }
+
+        .message:last-child {
+            margin-bottom: 0;
         }
 
         @keyframes fadeInUp {
@@ -208,6 +211,10 @@
             transform: scale(0.98);
         }
 
+        .send-btn:disabled {
+            opacity: 0.3;
+        }
+
         .empty-state {
             text-align: center;
             color: #718096;
@@ -220,7 +227,6 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
             border-radius: 3px;
         }
 
@@ -236,17 +242,13 @@
         @media (min-width: 768px) {
             body {
                 padding: 20px;
+                overflow: hidden;
             }
 
             .container {
                 border-radius: 20px;
                 overflow: hidden;
                 height: calc(100dvh - 40px);
-
-            }
-
-            .user-info {
-                margin-bottom: 10px;
             }
         }
 
@@ -290,7 +292,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>💬 食不食油饼？</h1>
+            <div class="user-info">
+                <span id="username"></span>
+                <span id="status-1">连接中...</span>
+            </div>
             <div class="header-buttons">
                 <button id="clearHistory" class="btn btn-clear" onclick="clearHistory()">清空记录</button>
                 <a href="/files.html" class="btn btn-files">📁 文件</a>
@@ -298,12 +303,6 @@
         </div>
 
         <div class="chat-area">
-            <div class="user-info">
-                <span>ID：</span>
-                <span id="username"></span>
-                <span id="status-1">连接中...</span>
-            </div>
-
             <div class="messages" id="messages">
                 <div class="empty-state">
                     开始唱跳RAP吧！
@@ -313,20 +312,23 @@
 
         <div class="input-area">
             <input type="text" id="messageInput" class="message-input" placeholder="输入消息..." maxlength="500">
-            <button class="send-btn" onclick="sendMessage()">发送</button>
+            <button class="send-btn" id="send-btn">发送</button>
         </div>
     </div>
 
     <script>
         let userid;
+        let username;
+        const sendbtn = document.getElementById('send-btn');
         // 初始化
         // Socket.IO 连接
         const socket = io();
         socket.on('id', (data) => {
-            userid = data;
-            document.getElementById('username').textContent = userid;
+            userid = data.id;
+            username = data.username;
+            document.getElementById('username').textContent = username;
             const btn = document.getElementById('clearHistory')
-            if (userid === 'user_001') { btn.style.display = 'inline-flex' }
+            if (userid === 'admin') { btn.style.display = 'inline-flex' }
         });
         socket.on('error', (data) => {
             console.log(data);
@@ -334,6 +336,34 @@
         });
         socket.on('refresh', (url) => {
             if (url) { window.location.href = url; } else { location.reload(); }
+        });
+        socket.on('chat message', displayMessage);
+
+        socket.on('chat history', (history) => {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+
+            if (history.length === 0) {
+                messagesDiv.innerHTML = '<div class="empty-state">开始唱跳RAP吧！</div>';
+            } else {
+                history.forEach(displayMessage);
+            }
+        });
+
+        socket.on('history cleared', () => {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '<div class="empty-state">聊天记录已清空</div>';
+        });
+        socket.on('connect', () => {
+            console.log('已连接到服务器');
+            statusDiv.textContent = '已连接';
+            statusDiv.style.color = '#4ee54e'; // 对应绿色样式
+        });
+
+        socket.on('disconnect', () => {
+            console.log('与服务器断开连接');
+            statusDiv.textContent = '未连接';
+            statusDiv.style.color = 'red'; // 对应红色样式
         });
         // 发送消息
         function sendMessage() {
@@ -345,7 +375,11 @@
                     message: message
                 });
                 input.value = '';
-            }
+                sendbtn.disabled = true;
+            };
+            setTimeout(() => {
+                sendbtn.disabled = false;
+            }, 1000);
         }
 
         // 清空聊天记录
@@ -397,7 +431,7 @@
 
             messageheader.appendChild(username);
             messageheader.appendChild(timestamp);
-            if (userid === 'user_001') { messageheader.appendChild(deletebtn) };
+            if (userid === 'admin') { messageheader.appendChild(deletebtn) };
             messageDiv.appendChild(messageheader);
             messageDiv.appendChild(messagecontent);
 
@@ -407,45 +441,20 @@
         }
 
         // Socket 事件监听
-        socket.on('chat message', displayMessage);
 
-        socket.on('chat history', (history) => {
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = '';
 
-            if (history.length === 0) {
-                messagesDiv.innerHTML = '<div class="empty-state">开始唱跳RAP吧！</div>';
-            } else {
-                history.forEach(displayMessage);
-            }
-        });
-
-        socket.on('history cleared', () => {
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = '<div class="empty-state">聊天记录已清空</div>';
-        });
-
-        // 回车发送消息
+        // 发送消息
+        sendbtn.addEventListener('click', sendMessage);
         document.getElementById('messageInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                sendMessage();
+                sendbtn.click();
             }
         });
 
         // 连接状态提示
         const statusDiv = document.getElementById('status-1');
 
-        socket.on('connect', () => {
-            console.log('已连接到服务器');
-            statusDiv.textContent = '已连接';
-            statusDiv.style.color = 'green'; // 对应绿色样式
-        });
 
-        socket.on('disconnect', () => {
-            console.log('与服务器断开连接');
-            statusDiv.textContent = '未连接';
-            statusDiv.style.color = 'red'; // 对应红色样式
-        });
         async function lgo() {
             try {
                 const response = await fetch('/api/logout', {

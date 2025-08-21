@@ -1,0 +1,16 @@
+[
+  {
+    "username": "食不食油饼",
+    "email": "100",
+    "password": "123456",
+    "userId": "admin",
+    "sessionToken": "1fc29673-d460-4299-83a6-f8f03625bef0"
+  },
+  {
+    "username": "ikun_01",
+    "email": "200",
+    "password": "654321",
+    "userId": "a3fff01b-b744-4713-a2d5-772d24ee30c6",
+    "sessionToken": "3694569f-18bf-45c8-8a33-013b75e978ee"
+  }
+]

@@ -1,14 +1,15 @@
 import dotenv from 'dotenv';
-import { initializeAuth } from './auth.js';
+import { initializeUsers } from './users.js';
 import express from 'express';
-import { createServer } from 'http'; // 从 'http' 模块解构 createServer
-import { Server } from 'socket.io'; // 从 'socket.io' 模块解构 Server 类
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import cors from 'cors';
-import { fileURLToPath } from 'url'; // 辅助函数，用于获取当前文件路径
-import { dirname } from 'path';     // 辅助函数，用于获取目录名
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import cookieParser from 'cookie-parser';
 // 模拟 CommonJS 中的 __dirname 和 __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +22,18 @@ dotenv.config();
 const PORT = process.env.PORT || '3000';
 const HOST = process.env.HOST || '127.0.0.1';
 const COOKIE_SECRET = process.env.cookieSecret;
-const USERS = JSON.parse(process.env.users);
+const loadJson = async () => {
+  const filePath = './users.json';
+  try {
+    if (!fs.existsSync(filePath)) await writeFile(filePath, '[]', 'utf-8');
+    const content = await readFile(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch (err) {
+    console.error(`读取或创建 ${filePath} 失败:`, err);
+    process.exit(1);
+  }
+};
+let users = await loadJson();
 
 // 确保数据目录存在
 const dataDir = path.join(__dirname, 'data');
@@ -35,7 +47,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 app.use(express.json());
-initializeAuth(app, USERS, COOKIE_SECRET);
+initializeUsers(app, users);
 // 中间件
 app.use(cors());
 app.use(express.json());
@@ -102,25 +114,25 @@ function saveChatHistory() {
 
 // Socket.IO 连接处理
 io.on('connection', (socket) => {
-  const userId = socket.request.signedCookies && socket.request.signedCookies.user_id;
-  if (userId) {
-    console.log(`Socket.IO 客户端连接成功，用户ID: ${userId}`);
+  const userId = socket.request.signedCookies?.session_id?.userId;
+  const sessionToken = socket.request.signedCookies?.session_id?.sessionToken;
+  const user = users.find(user => user.userId === userId && user.sessionToken === sessionToken);
+  if (user) {
+    socket.user = user;
     socket.userId = userId;
   } else {
-    console.log("Socket.IO 客户端连接成功，但未找到用户 ID 或未认证，跳转登录页面");
-    socket.emit('refresh', '/login.html');
-    socket.emit("error", "登录已过期，请刷新网页重新登录，如果你刚刚登录过了，可能是你的浏览器禁用了cookie！");
+    socket.emit('refresh','signup.html');
     socket.disconnect();
     return;
   }
-  socket.emit('id', userId);
+  socket.emit('id', { username: user.username, id: user.userId });
   socket.emit('chat history', chatHistory);
 
   // 处理新消息
   socket.on('chat message', (data) => {
     const message = {
       id: Date.now(),
-      username: socket.userId,
+      username: socket.user.username,
       message: data.message,
       timestamp: new Date().toLocaleString('zh-CN')
     };
@@ -132,7 +144,7 @@ io.on('connection', (socket) => {
 
   // 处理清空记录
   socket.on('clear history', () => {
-    if (socket.userId !== 'user_001') {
+    if (socket.userId !== 'admin') {
       socket.emit('error', '食不食油饼');
       return
     };
@@ -143,18 +155,18 @@ io.on('connection', (socket) => {
 
   //删除单个历史记录
   socket.on('deletemessage', (id) => {
-    if (socket.userId !== 'user_001') {
+    if (socket.userId !== 'admin') {
       socket.emit('error', '食不食油饼');
       return
     };
-    console.log('删除消息：',id)
+    console.log('删除消息：', id)
     chatHistory = chatHistory.filter(item => item.id !== id);
     saveChatHistory();
     io.emit('chat history', chatHistory);
   });
 
   socket.on('disconnect', () => {
-    console.log(`Socket.IO 客户端连接断开，用户ID: ${userId}`);
+
   });
 });
 
